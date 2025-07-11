@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Real-Time Super-Resolution</title>
+  <style>
+    body{font-family:sans-serif;background:#111;color:#eee;text-align:center}
+    #wrap{display:flex;gap:1rem;justify-content:center;margin-top:2rem;flex-wrap:wrap}
+    video,img{border:2px solid #444;border-radius:12px;width:320px;height:240px}
+    #fps{margin-top:1rem}
+  </style>
+</head>
+<body>
+  <h1>Real-Time Super-Resolution Demo</h1>
+  <p>Left = raw webcam &nbsp;|&nbsp; Right = server SR output</p>
+
+  <div id="wrap">
+    <video id="cam" autoplay playsinline muted></video>
+    <img id="sr" alt="SR output">
+  </div>
+
+  <button id="snapBtn" style="margin-top:1rem">Snap & Enhance</button>
+  <p id="status"></p>
+
+  <canvas id="off" width="320" height="240" style="display:none"></canvas>
+  <div id="fps"></div>
+
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  <script>
+  /* eslint-env browser */
+  const socket   = io();                         // real-time stream
+  const video    = document.getElementById('cam');
+  const canvas   = document.getElementById('off');
+  const ctx      = canvas.getContext('2d', { willReadFrequently:true });
+  const imgSR    = document.getElementById('sr');
+  const snapBtn  = document.getElementById('snapBtn');
+  const statusEl = document.getElementById('status');
+  const fpsEl    = document.getElementById('fps');
+
+  // ---- 1. Start webcam ----------------------------------------------------
+  navigator.mediaDevices.getUserMedia({ video:true })
+    .then(stream => { video.srcObject = stream; requestAnimationFrame(loop); })
+    .catch(err   => alert('Camera error: ' + err));
+
+  // ---- 2. Continuous low-latency stream over WebSocket --------------------
+  let sent = 0, last = performance.now();
+  function loop() {
+    if (video.readyState >= 2) {                 // HAVE_CURRENT_DATA
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      socket.volatile.emit('frame', canvas.toDataURL('image/jpeg', 0.7));
+    }
+    sent++;
+    const now = performance.now();
+    if (now - last > 1000) {
+      fpsEl.textContent = `Send FPS: ${sent}`;   // simple FPS meter
+      sent = 0; last = now;
+    }
+    requestAnimationFrame(loop);
+  }
+  socket.on('sr_frame', url => { imgSR.src = url; });
+
+  // ---- 3. Snapshot-on-click via HTTP POST ---------------------------------
+  snapBtn.addEventListener('click', () => {
+    statusEl.textContent = 'Capturing…';
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob(async blob => {
+      try {
+        const form = new FormData();
+        form.append('file', blob, 'snapshot.jpg');
+        const r = await fetch('/upload', { method:'POST', body:form });
+        const j = await r.json();
+        if (j.sr) {
+          imgSR.src = j.sr;
+          statusEl.textContent = 'Snapshot enhanced ✔️';
+        } else {
+          statusEl.textContent = 'Server error';
+        }
+      } catch (e) {
+        console.error(e);
+        statusEl.textContent = 'Network error';
+      }
+    }, 'image/jpeg', 0.85);
+  });
+  </script>
+</body>
+</html>
