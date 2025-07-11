@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Camera Zoom & Pan</title>
+  <title>Camera Zoom & Pan with Boundaries</title>
   <style>
     canvas {
-      border: 1px solid black;
+      border: 1px solid #333;
       cursor: grab;
     }
   </style>
 </head>
 <body>
-  <h2>Camera Zoom and Pan</h2>
-  <canvas id="canvas"></canvas>
+  <h2>Camera Zoom and Pan (with Boundary Lock)</h2>
+  <canvas id="canvas" width="640" height="480"></canvas>
 
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
+
     let scale = 1.0;
     let offsetX = 0;
     let offsetY = 0;
@@ -26,8 +27,6 @@
     img.src = '/video_feed';
 
     img.onload = () => {
-      canvas.width = 640;
-      canvas.height = 480;
       requestAnimationFrame(draw);
     };
 
@@ -43,16 +42,24 @@
 
     canvas.addEventListener('wheel', e => {
       e.preventDefault();
+
       const factor = 1.1;
       const mouseX = (e.offsetX - offsetX) / scale;
       const mouseY = (e.offsetY - offsetY) / scale;
 
-      if (e.deltaY < 0) scale *= factor;
-      else scale /= factor;
+      if (e.deltaY < 0) {
+        scale *= factor;
+      } else {
+        scale /= factor;
+      }
 
-      // Fix offset to zoom into mouse point
+      const minScale = Math.max(canvas.width / img.width, canvas.height / img.height);
+      if (scale < minScale) scale = minScale;
+
       offsetX = e.offsetX - mouseX * scale;
       offsetY = e.offsetY - mouseY * scale;
+
+      fixBounds();
     });
 
     canvas.addEventListener('mousedown', e => {
@@ -65,11 +72,29 @@
       if (dragging) {
         offsetX = e.offsetX - startX;
         offsetY = e.offsetY - startY;
+        fixBounds();
       }
     });
 
     canvas.addEventListener('mouseup', () => dragging = false);
     canvas.addEventListener('mouseleave', () => dragging = false);
+
+    function fixBounds() {
+      const scaledWidth = img.width * scale;
+      const scaledHeight = img.height * scale;
+
+      if (scaledWidth <= canvas.width) {
+        offsetX = (canvas.width - scaledWidth) / 2;
+      } else {
+        offsetX = Math.min(0, Math.max(offsetX, canvas.width - scaledWidth));
+      }
+
+      if (scaledHeight <= canvas.height) {
+        offsetY = (canvas.height - scaledHeight) / 2;
+      } else {
+        offsetY = Math.min(0, Math.max(offsetY, canvas.height - scaledHeight));
+      }
+    }
   </script>
 </body>
 </html>
