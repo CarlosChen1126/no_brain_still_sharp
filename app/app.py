@@ -9,7 +9,7 @@ import torch
 from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
 from sr_model_top import upscale_image_from_path_or_url
-from face_model_top import face_detection
+from face_model_top import face_detection, face_detection_recover
 
 from PIL import Image
 
@@ -50,7 +50,9 @@ def upload():
 
     return jsonify(sr=sr_results)
     
-
+# @app.route('/recover', methods=['POST'])
+# def recover():
+#     face_images_r, o_w, o_h, o_pos_lists = face_detection_recover(img)
 if __name__ == "__main__":
     # Use eventlet for production; disable Flask debug for speed.
-    socketio.run(app, host="0.0.0.0", port=5001)
+    socketio.run(app, host="0.0.0.0", port=5000)

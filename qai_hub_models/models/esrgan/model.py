@@ -13,9 +13,9 @@ ESRGAN_SOURCE_REPOSITORY = "https://github.com/xinntao/ESRGAN"
 ESRGAN_SOURCE_REPO_COMMIT = "73e9b634cf987f5996ac2dd33f4050922398a921"
 MODEL_ID = __name__.split(".")[-2]
 MODEL_ASSET_VERSION = 2
-# DEFAULT_WEIGHTS = CachedWebModelAsset.from_asset_store(
-#     MODEL_ID, MODEL_ASSET_VERSION, "RRDB_ESRGAN_x4.pth"
-# )
+DEFAULT_WEIGHTS = CachedWebModelAsset.from_asset_store(
+    MODEL_ID, MODEL_ASSET_VERSION, "RRDB_ESRGAN_x4.pth"
+)
 SCALING_FACTOR = 4
 
 
@@ -51,10 +51,9 @@ def _load_esrgan_source_model_from_weights(
         # weights_path = "/Users/chenyuchen/.qaihm/models/esrgan/v2/RRDB_ESRGAN_x4.pth"
         # download the weights file
         if not weights_path:
-            weights_path = "/Users/chenyuchen/.qaihm/models/esrgan/v2/RRDB_ESRGAN_x4.pth"
-            # weights_path = DEFAULT_WEIGHTS.fetch()
-            # print("hihihihihih")
-            # print(f"Weights file downloaded as {weights_path}")
+            # weights_path = "/Users/chenyuchen/.qaihm/models/esrgan/v2/RRDB_ESRGAN_x4.pth"
+            weights_path = DEFAULT_WEIGHTS.fetch()
+            print(f"Weights file downloaded as {weights_path}")
 
         # necessary import. `esrgan.RRDBNet_arch` comes from the esrgan repo.
         import RRDBNet_arch as arch
