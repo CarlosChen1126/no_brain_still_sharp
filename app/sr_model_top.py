@@ -30,7 +30,7 @@ def _load_model_once():
     if _model_instance is None:
         with _model_lock:
             if _model_instance is None:
-                print("📦 Loading ESRGAN model...")
+                print("Loading ESRGAN model...")
                 model_cls = Real_ESRGAN_General_x4v3
                 parser = get_model_cli_parser(model_cls)
                 parser = get_on_device_demo_parser(

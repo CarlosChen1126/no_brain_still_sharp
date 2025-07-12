@@ -63,9 +63,10 @@ def recover():
     
     face_images_r, o_w, o_h, o_pos_lists = face_detection_recover(img)
     sr_results = []
-    for face_image in face_images_r:
+    for i, face_image in enumerate(face_images_r):
         sr_face_img = upscale_image_from_path_or_url(face_image)
         sr_results.append(sr_face_img[0])
+        sr_face_img[0].save(f"crop_{i}_sr.jpg")
     rec_pic = pic_recover(sr_results, o_w, o_h, o_pos_lists, img)
     buf = io.BytesIO()
     rec_pic.save(buf, format='JPEG', quality=90)

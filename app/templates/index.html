@@ -231,9 +231,44 @@
       requestAnimationFrame(loop);
     }
 
-    snapBtn.addEventListener('click', () => {
-      frameCounter = POST_EVERY_N_FRAMES;
-    });
+    async function captureAndRecover() {
+      if (video.readyState < 2) {
+        statusEl.textContent = 'Camera not ready';
+        return;
+      }
+
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      canvas.toBlob(async blob => {
+        const form = new FormData();
+        form.append('file', blob, 'frame.jpg');
+        statusEl.textContent = '🔄 Recovering image...';
+
+        try {
+          const start = performance.now();
+          const response = await fetch('/recover', {
+            method: 'POST',
+            body: form
+          });
+
+          const json = await response.json();
+          const duration = ((performance.now() - start) / 1000).toFixed(2);
+
+          if (json.sr) {
+            selectedFace.src = json.sr; // TODO: change to another block
+            statusEl.textContent = `Recovered in ${duration}s`;
+          } else {
+            statusEl.textContent = 'Recovery failed';
+          }
+        } catch (err) {
+          console.error(err);
+          statusEl.textContent = 'Network error';
+        }
+      }, 'image/jpeg', 0.8);
+    }
+
+    snapBtn.addEventListener('click', captureAndRecover);
+
   </script>
 </body>
 </html>
