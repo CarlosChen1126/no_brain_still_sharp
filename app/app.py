@@ -9,7 +9,7 @@ import torch
 from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
 from sr_model_top import upscale_image_from_path_or_url
-from face_model_top import face_detection, face_detection_recover
+from face_model_top import face_detection, face_detection_recover, pic_recover
 
 from PIL import Image
 
@@ -50,9 +50,30 @@ def upload():
 
     return jsonify(sr=sr_results)
     
-# @app.route('/recover', methods=['POST'])
-# def recover():
-#     face_images_r, o_w, o_h, o_pos_lists = face_detection_recover(img)
+@app.route('/recover', methods=['POST'])
+def recover():
+    file = request.files.get('file')
+    if file is None:
+        return jsonify(error='No file uploaded'), 400
+
+    try:
+        img = Image.open(file.stream).convert('RGB')
+    except Exception as exc:
+        return jsonify(error=f'Bad image: {exc}'), 400
+    
+    face_images_r, o_w, o_h, o_pos_lists = face_detection_recover(img)
+    sr_results = []
+    for face_image in face_images_r:
+        sr_face_img = upscale_image_from_path_or_url(face_image)
+        sr_results.append(sr_face_img[0])
+    rec_pic = pic_recover(sr_results, o_w, o_h, o_pos_lists, img)
+    buf = io.BytesIO()
+    rec_pic.save(buf, format='JPEG', quality=90)
+    b64 = base64.b64encode(buf.getvalue()).decode()
+    data_uri = f'data:image/jpeg;base64,{b64}'
+    return jsonify(sr=data_uri)
+
+
 if __name__ == "__main__":
     # Use eventlet for production; disable Flask debug for speed.
     socketio.run(app, host="0.0.0.0", port=5000)
