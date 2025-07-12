@@ -299,7 +299,7 @@
           const duration = ((performance.now() - start) / 1000).toFixed(2);
 
           if (json.sr) {
-            selectedFace.src = json.sr; // TODO: change to another block
+            resultImg.src = json.sr; // TODO: change to another block
             statusEl.textContent = `Recovered in ${duration}s`;
           } else {
             statusEl.textContent = 'Recovery failed';

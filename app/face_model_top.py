@@ -56,10 +56,10 @@ def extract_bounding_boxes_recover(img: Image.Image, boxes: list):
         lower = int(y + h)
         
         crop = img.crop((left, upper, right, lower))
-        pos_list.append(left)
-        pos_list.append(upper)
-        pos_list.append(right)
-        pos_list.append(lower)
+        pos_list.append(x)
+        pos_list.append(y)
+        pos_list.append(w)
+        pos_list.append(h)
         pos_lists.append(pos_list)
         crops.append(crop)
     return crops, pos_lists
@@ -97,18 +97,22 @@ def face_detection(image: Image.Image):
     args = parser.parse_args([])
     model = demo_model_from_cli_args(FaceDetLite, MODEL_ID, args)
     validate_on_device_demo_args(args, MODEL_ID)
-
+    print("old image size: ", image.size)
     resized_image = resize_to_multiple_of_32(image)
+    print("resized image size: ", resized_image.size)
     print("Model Loaded")
 
     app = FaceDetLiteApp(model)
     res, _ = app.run_inference_on_image(resized_image)
     boxes = ast.literal_eval(str(res))
     crops = extract_bounding_boxes(resized_image, boxes)
+    print("small image size: ", crops[0].size)
+    print(boxes)
 
     enhanced_crops = []
     for crop in crops:
         sr = upscale_image_from_path_or_url(crop)
+        # print("small optimized image size: ", sr[0].size)
         if sr:
             enhanced_crops.append(sr[0])
         else:
@@ -161,22 +165,39 @@ def face_detection_recover(image: Image.Image):
     out_dict["bounding box"] = str(res)
     boxes = ast.literal_eval(out_dict["bounding box"])
     crops, original_pos_lists = extract_bounding_boxes_recover(resized_image, boxes)
+    original_pos_lists = rescale_boxes(original_pos_lists, resized_image.size, (original_w, original_h))
+
     for i, crop in enumerate(crops):
         face_images.append(crop)
-        # crop.save(f"crop_{i}.jpg")
+        crop.save(f"crop_{i}.jpg")
     return face_images, original_w, original_h, original_pos_lists
-def paste_boxes_back_to_image(img: Image.Image, boxes: list, small_img: Image.Image) -> Image.Image:
+def rescale_boxes(boxes, resized_size, original_size):
+    resized_w, resized_h = resized_size
+    original_w, original_h = original_size
+    scale_x = original_w / resized_w
+    scale_y = original_h / resized_h
+
+    scaled_boxes = []
+    for x, y, w, h in boxes:
+        scaled_x = x * scale_x
+        scaled_y = y * scale_y
+        scaled_w = w * scale_x
+        scaled_h = h * scale_y
+        scaled_boxes.append([scaled_x, scaled_y, scaled_w, scaled_h])
+    return scaled_boxes
+def paste_boxes_back_to_image(img: Image.Image, box: list, small_img: Image.Image) -> Image.Image:
     img_copy = img.copy()
 
-    # for box in boxes:
-        # print(box)
-    x, y, w, h = boxes
+    x, y, w, h = box
     left = int(x)
     upper = int(y)
     right = int(x + w)
     lower = int(y + h)
-    
-    img_copy.paste(small_img, (left, upper))
+    # print("[back] small image size: ", small_img.size)
+    # print(box)
+    resized_small = small_img.resize((int(w), int(h)))
+    # print("[back] resized small image size: ", resized_small.size)
+    img_copy.paste(resized_small, (left, upper))
 
     return img_copy
 def pic_recover(images: List[Image.Image], original_w, original_h, original_pos_lists, o_img):
