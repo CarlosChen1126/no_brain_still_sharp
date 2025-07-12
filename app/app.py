@@ -11,7 +11,7 @@ from flask_socketio import SocketIO, emit
 from sr_model_top import upscale_image_from_path_or_url
 from face_model_top import face_detection, face_detection_recover, pic_recover
 from detr_model_top import detr_run
-from yolo_model_top import yolo_detection
+# from yolo_model_top import yolo_detection
 
 
 from PIL import Image
@@ -41,16 +41,21 @@ def upload():
 
     # Run face detection (saves crops to /Data internally)
     face_images = face_detection(img)
-    # detr_images = detr_run(img)
-    yolo_images = yolo_detection(img)
+    detr_images = detr_run(img)
+    # detr_image.save("detr_image.jpeg")
+    # yolo_images = yolo_detection(img)
+    # for i, d_img in enumerate(detr_images):
+    #     d_img.save(f"d_img_{i}.jpeg")
+    #     print("save d_img")
 
-    print("face_images: ", len(face_images))
-    print("yolo_images: ", len(yolo_images))
-    # print("detr_images: ", len(detr_images))
+    print("len face_images: ", len(face_images))
+    # print("yolo_images: ", len(yolo_images))
+    print("len detr_images: ", len(detr_images))
 
-    face_images = face_images + yolo_images
+    print("face_images: ", face_images)
+    print("detr_images: ", detr_images)
+    face_images = face_images + detr_images
 
-    print(face_images)
 
     sr_results = []
     

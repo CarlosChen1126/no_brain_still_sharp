@@ -32,13 +32,49 @@ from sr_model_top import upscale_image_from_path_or_url  # ✅ Import your SR fu
 #     default_image: str | CachedWebAsset,
 #     is_test: bool = False,
 # ):
+from typing import List, Tuple
+
+def map_boxes_back_to_original(
+    boxes: List[Tuple[float, float, float, float]],
+    original_size: Tuple[int, int],
+    resized_size: Tuple[int, int]
+) -> List[Tuple[int, int, int, int]]:
+    """
+    Map bounding boxes from resized image back to original image dimensions.
+
+    Args:
+        boxes: List of bounding boxes [(x1, y1, x2, y2)] in resized image.
+        original_size: (width, height) of the original image.
+        resized_size: (width, height) of the resized image.
+
+    Returns:
+        List of boxes mapped back to original image size.
+    """
+    orig_w, orig_h = original_size
+    resized_w, resized_h = resized_size
+
+    scale_x = orig_w / resized_w
+    scale_y = orig_h / resized_h
+
+    mapped_boxes = []
+    for box in boxes:
+        x1, y1, x2, y2 = box
+        mapped_box = (
+            int(x1 * scale_x),
+            int(y1 * scale_y),
+            int(x2 * scale_x),
+            int(y2 * scale_y)
+        )
+        mapped_boxes.append(mapped_box)
+
+    return mapped_boxes
 
 
 def extract_bounding_boxes(img: Image.Image, boxes: list):
     crops = []
     for box in boxes:
-        x, y, w, h = box
-        crop = img.crop((int(x), int(y), int(x + w), int(y + h)))
+        x, y, rx, ry = box
+        crop = img.crop((int(x), int(y), int(rx), int(ry)))
         crops.append(crop)
     return crops
 
@@ -68,14 +104,19 @@ def detr_run(img: Image.Image):
         input_spec = detr.get_input_spec()
     else:
         input_spec = ConditionalDETRResNet50.get_input_spec()
-    (h, w) = input_spec["image"][0][2:]
+    # (h, w) = input_spec["image"][0][2:]
+    # w, h = image.size
 
     # Run app to scores, labels and boxes
     # img = load_image(args.image)
-    resized_image = resize_to_multiple_of_32(img)
+    w, h = img.size  # (w, h) of original image
+    # resized_image = resize_to_multiple_of_32(img)
+    # resized_size = resized_image.size
     app = DETRApp(detr, h, w)
-    pred_images, scores, labels, boxes = app.predict(resized_image, DEFAULT_WEIGHTS, threshold = 0.5)
-    crops = extract_bounding_boxes(resized_image, boxes)
+    pred_images, scores, labels, boxes = app.predict(img, DEFAULT_WEIGHTS, threshold = 0.7)
+    boxes[:, 0::2] = boxes[:, 0::2].clamp(0, w)  # x1, x2
+    boxes[:, 1::2] = boxes[:, 1::2].clamp(0, h)  # y1, y2
+    crops = extract_bounding_boxes(img, boxes)
     # pred_image = Image.fromarray(pred_images[0])
 
     enhanced_crops = []
@@ -95,6 +136,8 @@ def detr_run(img: Image.Image):
     #     display_or_save_image(pred_image, args.output_dir)
 
     print("------done------")
+    print("h: ", h)
+    print("w: ", w)
     print("scores: ", scores)
     print("labels: ", labels)
     print("boxes: ", boxes)
