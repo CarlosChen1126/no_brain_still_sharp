@@ -88,4 +88,6 @@ def face_detection(image: Image.Image):
 
         manage_folders(Path("Data"))
 
+    print("enhanced_crops: ", enhanced_crops)
+
     return enhanced_crops

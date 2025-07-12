@@ -10,6 +10,7 @@ from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
 from sr_model_top import upscale_image_from_path_or_url
 from face_model_top import face_detection
+from detr_model_top import detr_run
 
 from PIL import Image
 
@@ -38,8 +39,17 @@ def upload():
 
     # Run face detection (saves crops to /Data internally)
     face_images = face_detection(img)
+    detr_images = detr_run(img)
+
+    print("face_images: ", len(face_images))
+    print("detr_images: ", len(detr_images))
+
+    face_images = face_images + detr_images
+
+    print(face_images)
 
     sr_results = []
+    
     for face_image in face_images:
         sr_face_img = upscale_image_from_path_or_url(face_image)
         buf = io.BytesIO()
