@@ -21,11 +21,23 @@ from qai_hub_models.utils.args import (
 _last_save_time = datetime.min
 SAVE_INTERVAL = timedelta(seconds=6)
 
-def extract_bounding_boxes(img: Image.Image, boxes: list):
+def extract_bounding_boxes(img: Image.Image, boxes: list, top_pad_ratio=0.4, side_pad_ratio=0.1):
     crops = []
+    img_w, img_h = img.size
+
     for box in boxes:
         x, y, w, h, _ = box
-        crop = img.crop((int(x), int(y), int(x + w), int(y + h)))
+
+        # Expand the bounding box
+        pad_top = int(h * top_pad_ratio)
+        pad_side = int(w * side_pad_ratio)
+
+        left = max(int(x - pad_side), 0)
+        upper = max(int(y - pad_top), 0)
+        right = min(int(x + w + pad_side), img_w)
+        lower = min(int(y + h + pad_side), img_h)
+
+        crop = img.crop((left, upper, right, lower))
         crops.append(crop)
     return crops
 

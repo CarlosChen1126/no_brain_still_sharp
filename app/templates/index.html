@@ -1,102 +1,78 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Real-Time Super-Resolution</title>
+  <meta charset="UTF-8" />
+  <title>404 Brain Not Found - Real-Time Super Resolution</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #111;
-      color: #eee;
+    :root {
+      --base-img-width: 200px;
+      --base-img-height: 280px;
+      --base-gap: 14px;
+      --scale-factor: 1;
+    }
+
+    html, body {
       margin: 0;
-      padding: 0;
+      height: 100%;
+      background-color: #111;
+      font-family: 'Segoe UI', sans-serif;
+      color: #eee;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #1a1a1a;
+      padding: 1rem 2rem;
       text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    header h1 {
+      color: #00e0ff;
+      margin: 0;
+      font-size: 1.8rem;
+    }
+
+    header p {
+      margin: 0.2rem 0;
+      color: #bbb;
+    }
+
+    #container {
+      display: flex;
+      flex: 1;
+      gap: 2rem;
+      padding: 1rem 2rem;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    #camView {
+      flex-shrink: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
-    header {
-      background-color: #1a1a1a;
-      padding: 1.2rem 2rem;
-      width: 100%;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-    }
-
-    h1 {
-      font-size: 1.8rem;
-      margin: 0;
-      color: #00e0ff;
-    }
-
-    p {
-      margin: 0.25rem 0;
-      font-size: 1rem;
-      color: #ccc;
-    }
-
-    #wrap {
+    #previewRow {
       display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      gap: 2rem;
-      margin-top: 2rem;
-      max-width: 90%;
+      gap: 1rem;
+      margin-bottom: 1rem;
     }
 
-    video, img {
+    video, #resultImg {
       border: 2px solid #444;
       border-radius: 12px;
-      width: 400px;
-      height: 300px;
+      width: 480px;
+      height: 360px;
       object-fit: cover;
-    }
-
-    #srGallery {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-
-    #srGallery img {
-      width: 160px;
-      height: 120px;
-      cursor: pointer;
-      transition: 0.2s;
-      border-radius: 8px;
-      border: 2px solid #444;
-    }
-
-    #srGallery img:hover {
-      transform: scale(1.05);
-      border-color: #00e0ff;
-    }
-
-    #selectedBox {
-      margin-top: 2rem;
-      padding: 1rem;
-      border: 2px dashed #00e0ff;
-      border-radius: 10px;
-      width: 420px;
-      min-height: 300px;
-    }
-
-    #selectedFace {
-      max-width: 100%;
-      max-height: 280px;
-      border-radius: 10px;
+      background-color: #222;
     }
 
     #controls {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      margin-top: 1.5rem;
-      transform: translateX(-15px);
+      margin-top: 0.5rem;
     }
 
     .icon-btn {
@@ -119,121 +95,189 @@
     }
 
     #status, #fps {
-      margin-top: 0.5rem;
-      font-size: 0.95rem;
-      color: #aaa;
+      font-size: 0.9rem;
+      margin-top: 0.4rem;
+      color: #888;
     }
 
-    canvas {
-      display: none;
+    #rightPanel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
+
+    #srGallery {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      align-items: flex-start;
+      gap: var(--base-gap);
+      overflow-y: auto;
+      padding: 0.5rem 0;
+      max-height: 300px;
+    }
+
+    #srGallery img {
+      width: var(--base-img-width);
+      height: var(--base-img-height);
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid #444;
+      transition: transform 0.2s ease;
+      cursor: pointer;
+    }
+
+    #srGallery img:hover {
+      transform: scale(1.05);
+      border-color: #00e0ff;
+    }
+
+    #selectedBox {
+      padding-top: 0.8rem;
+      border-top: 1px solid #333;
+    }
+
+    #selectedBox h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1rem;
+      color: #00e0ff;
+    }
+
+    #selectedFace {
+      width: 200px;
+      max-height: 240px;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 2px solid #00e0ff;
+      box-shadow: 0 0 8px rgba(0, 224, 255, 0.3);
+    }
+
+    canvas { display: none; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Real-Time Super-Resolution Demo</h1>
-    <p>Live face enhancement using Qualcomm AI models</p>
-  </header>
 
-  <div id="wrap">
-    <video id="cam" autoplay playsinline muted></video>
+<header>
+  <h1>404 Brain Not Found</h1>
+  <p>Live face enhancement powered by Qualcomm AI</p>
+</header>
+
+<div id="container">
+  <div id="camView">
+    <div id="previewRow">
+      <video id="cam" autoplay playsinline muted></video>
+      <img id="resultImg" src="" alt="Reconstructed Image Output">
+    </div>
+    <div id="controls">
+      <button class="icon-btn" id="snapBtn">
+        <i class="fas fa-camera-retro"></i> Snap & Enhance
+      </button>
+    </div>
+    <p id="status"></p>
+    <div id="fps"></div>
+  </div>
+
+  <div id="rightPanel">
     <div id="srGallery"></div>
+    <div id="selectedBox">
+      <h3>Selected Face</h3>
+      <img id="selectedFace" src="" alt="Click a face to preview here">
+    </div>
   </div>
+</div>
 
-  <div id="controls">
-    <button class="icon-btn" id="snapBtn">
-      <i class="fas fa-camera-retro"></i> Snap & Enhance
-    </button>
-  </div>
+<canvas id="off" width="320" height="240"></canvas>
+<script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+<script>
+  const socket = io();
+  const video = document.getElementById('cam');
+  const canvas = document.getElementById('off');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const statusEl = document.getElementById('status');
+  const fpsEl = document.getElementById('fps');
+  const snapBtn = document.getElementById('snapBtn');
+  const selectedFace = document.getElementById('selectedFace');
+  const resultImg = document.getElementById('resultImg');
 
-  <p id="status"></p>
-  <div id="fps"></div>
-  <canvas id="off" width="320" height="240"></canvas>
+  let sent = 0, last = performance.now();
+  let frameCounter = 0;
+  const POST_EVERY_N_FRAMES = 180;
+  let isUploading = false;
 
-  <!-- Selected face box -->
-  <div id="selectedBox">
-    <h3>🔍 Selected Face Preview</h3>
-    <img id="selectedFace" src="" alt="Click a face to preview here">
-  </div>
-
-  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
-  <script>
-    const socket   = io();
-    const video    = document.getElementById('cam');
-    const canvas   = document.getElementById('off');
-    const ctx      = canvas.getContext('2d', { willReadFrequently:true });
-    const statusEl = document.getElementById('status');
-    const fpsEl    = document.getElementById('fps');
-    const snapBtn  = document.getElementById('snapBtn');
-    const selectedFace = document.getElementById('selectedFace');
-
-    let sent = 0, last = performance.now();
-    let frameCounter = 0;
-    const POST_EVERY_N_FRAMES = 180;
-    let isUploading = false;
-
-    navigator.mediaDevices.getUserMedia({ video:true })
-      .then(stream => { video.srcObject = stream; requestAnimationFrame(loop); })
-      .catch(err   => alert('Camera error: ' + err));
-
-    function loop() {
-      if (video.readyState >= 2) {
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        socket.volatile.emit('frame', canvas.toDataURL('image/jpeg', 0.7));
-
-        if (++frameCounter >= POST_EVERY_N_FRAMES && !isUploading) {
-          frameCounter = 0;
-          isUploading = true;
-
-          canvas.toBlob(async blob => {
-            const form = new FormData();
-            form.append('file', blob, 'frame.jpg');
-            const start = performance.now();
-
-            try {
-              const r = await fetch('/upload', { method: 'POST', body: form });
-              const j = await r.json();
-              const duration = ((performance.now() - start) / 1000).toFixed(2);
-              isUploading = false;
-
-              if (j.sr && Array.isArray(j.sr)) {
-                const gallery = document.getElementById('srGallery');
-                gallery.innerHTML = '';
-                j.sr.forEach(uri => {
-                  const img = document.createElement('img');
-                  img.src = uri;
-                  img.alt = 'SR face';
-                  img.onclick = () => {
-                    selectedFace.src = uri;
-                  };
-                  gallery.appendChild(img);
-                });
-                statusEl.textContent = `Auto scan ✔️ in ${duration}s (${j.sr.length} face${j.sr.length > 1 ? 's' : ''})`;
-              } else {
-                statusEl.textContent = 'No match or server error';
-              }
-            } catch (e) {
-              console.error(e);
-              statusEl.textContent = 'Network error';
-              isUploading = false;
-            }
-          }, 'image/jpeg', 0.65);
-        }
-      }
-
-      sent++;
-      const now = performance.now();
-      if (now - last > 1000) {
-        fpsEl.textContent = `FPS: ${sent}`;
-        sent = 0; last = now;
-      }
-
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
+      video.srcObject = stream;
       requestAnimationFrame(loop);
+    })
+    .catch(err => alert('Camera error: ' + err));
+
+  function loop() {
+    if (video.readyState >= 2) {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      socket.volatile.emit('frame', canvas.toDataURL('image/jpeg', 0.7));
+
+      if (++frameCounter >= POST_EVERY_N_FRAMES && !isUploading) {
+        frameCounter = 0;
+        isUploading = true;
+
+        canvas.toBlob(async blob => {
+          const form = new FormData();
+          form.append('file', blob, 'frame.jpg');
+          const start = performance.now();
+
+          try {
+            const r = await fetch('/upload', { method: 'POST', body: form });
+            const j = await r.json();
+            const duration = ((performance.now() - start) / 1000).toFixed(2);
+            isUploading = false;
+
+            if (j.sr && Array.isArray(j.sr)) {
+              const gallery = document.getElementById('srGallery');
+              gallery.innerHTML = '';
+
+              j.sr.forEach(uri => {
+                const img = document.createElement('img');
+                img.src = uri;
+                img.alt = 'SR face';
+                img.onclick = () => {
+                  selectedFace.src = uri;
+                };
+                gallery.appendChild(img);
+              });
+
+              if (j.result_image_url) {
+                resultImg.src = j.result_image_url;
+              }
+
+              statusEl.textContent = `Detected ${j.sr.length} face${j.sr.length > 1 ? 's' : ''} in ${duration}s`;
+            } else {
+              statusEl.textContent = 'No faces or server error';
+            }
+          } catch (e) {
+            console.error(e);
+            statusEl.textContent = 'Network error';
+            isUploading = false;
+          }
+        }, 'image/jpeg', 0.65);
+      }
     }
 
-    snapBtn.addEventListener('click', () => {
-      frameCounter = POST_EVERY_N_FRAMES;
-    });
-  </script>
+    sent++;
+    const now = performance.now();
+    if (now - last > 1000) {
+      fpsEl.textContent = `FPS: ${sent}`;
+      sent = 0;
+      last = now;
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  snapBtn.addEventListener('click', () => {
+    frameCounter = POST_EVERY_N_FRAMES;
+  });
+</script>
 </body>
 </html>
