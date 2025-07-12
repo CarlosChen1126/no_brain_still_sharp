@@ -36,20 +36,19 @@ def upload():
     except Exception as exc:
         return jsonify(error=f'Bad image: {exc}'), 400
 
+    # Run face detection (saves crops to /Data internally)
     face_images = face_detection(img)
-    sr_face_imgs = []
 
+    sr_results = []
     for face_image in face_images:
         sr_face_img = upscale_image_from_path_or_url(face_image)
-
-        # Encode to base64
         buf = io.BytesIO()
         sr_face_img[0].save(buf, format='JPEG', quality=90)
         b64 = base64.b64encode(buf.getvalue()).decode()
         data_uri = f'data:image/jpeg;base64,{b64}'
-        sr_face_imgs.append(data_uri)  # ✅ collect all data URIs
+        sr_results.append(data_uri)
 
-    return jsonify(sr=sr_face_imgs)  # ✅ return the full list
+    return jsonify(sr=sr_results)
     
 
 if __name__ == "__main__":

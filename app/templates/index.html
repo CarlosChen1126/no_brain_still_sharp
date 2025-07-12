@@ -2,95 +2,221 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Real-Time Super-Resolution</title>
+  <title>Qualcomm AI Hackathon – Real-Time Super-Resolution</title>
   <style>
-    body{font-family:sans-serif;background:#111;color:#eee;text-align:center}
-    #wrap{display:flex;gap:1rem;justify-content:center;margin-top:2rem;flex-wrap:wrap}
-    video,img{border:2px solid #444;border-radius:12px;width:320px;height:240px}
-    #fps{margin-top:1rem}
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #0f0f0f, #1c1c1c);
+      color: #eee;
+      text-align: center;
+    }
+
+    header {
+      background-color: #222;
+      padding: 1.5rem;
+      border-bottom: 2px solid #444;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #00e5ff;
+    }
+
+    header p {
+      margin: 0.5rem 0 0;
+      font-size: 1rem;
+      color: #bbb;
+    }
+
+    #wrap {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    video {
+      border: 3px solid #00e5ff;
+      border-radius: 16px;
+      width: 480px;
+      height: 360px;
+      box-shadow: 0 0 15px #00e5ff33;
+    }
+
+    #srGallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 1rem;
+      max-width: 1000px;
+    }
+
+    #srGallery img {
+      border-radius: 12px;
+      width: 180px;
+      height: 135px;
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+      transition: transform 0.2s ease;
+      cursor: pointer;
+    }
+
+    #srGallery img:hover {
+      transform: scale(1.05);
+    }
+
+    #selectedFace {
+      margin-top: 2rem;
+    }
+
+    #selectedFace img {
+      border: 3px solid #00ff88;
+      border-radius: 16px;
+      width: 300px;
+      height: auto;
+      box-shadow: 0 0 20px #00ff8844;
+    }
+
+    canvas {
+      display: none;
+    }
+
+    button {
+      background: #00e5ff;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 1.5rem;
+    }
+
+    button:hover {
+      background: #00bcd4;
+    }
+
+    #status {
+      margin-top: 1rem;
+      font-size: 1rem;
+      color: #88f;
+    }
+
+    #fps {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    footer {
+      margin-top: 3rem;
+      font-size: 0.8rem;
+      color: #555;
+    }
   </style>
 </head>
 <body>
-  <h1>Real-Time Super-Resolution Demo</h1>
-  <p>Left = raw webcam &nbsp;|&nbsp; Right = server SR output</p>
 
+  <header>
+    <h1>Qualcomm AI Hackathon</h1>
+    <p>Real-Time Face Detection + Super-Resolution using Qualcomm AI Models</p>
+  </header>
+
+  <!-- Section 1: Camera and SR Gallery -->
   <div id="wrap">
     <video id="cam" autoplay playsinline muted></video>
     <div id="srGallery"></div>
   </div>
 
-  <button id="snapBtn" style="margin-top:1rem">Snap & Enhance</button>
-  <p id="status"></p>
-
-  <canvas id="off" width="320" height="240" style="display:none"></canvas>
+  <!-- Section 2: Status -->
+  <p id="status">Initializing camera...</p>
   <div id="fps"></div>
+
+  <!-- Section 3: Selected Face -->
+  <div id="selectedFace">
+    <h2>Selected Face</h2>
+    <img id="selectedImg" src="" alt="Click a face to preview" />
+  </div>
+
+  <canvas id="off" width="320" height="240"></canvas>
 
   <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
   <script>
-  /* eslint-env browser */
-  const socket   = io();                         // real-time stream
-  const video    = document.getElementById('cam');
-  const canvas   = document.getElementById('off');
-  const ctx      = canvas.getContext('2d', { willReadFrequently:true });
-  /* const imgSR    = document.getElementById('sr'); */
-  const snapBtn  = document.getElementById('snapBtn');
-  const statusEl = document.getElementById('status');
-  const fpsEl    = document.getElementById('fps');
+    const socket   = io();
+    const video    = document.getElementById('cam');
+    const canvas   = document.getElementById('off');
+    const ctx      = canvas.getContext('2d', { willReadFrequently:true });
+    const statusEl = document.getElementById('status');
+    const fpsEl    = document.getElementById('fps');
+    const selectedImg = document.getElementById('selectedImg');
 
-  // ---- 1. Start webcam ----------------------------------------------------
-  navigator.mediaDevices.getUserMedia({ video:true })
-    .then(stream => { video.srcObject = stream; requestAnimationFrame(loop); })
-    .catch(err   => alert('Camera error: ' + err));
+    let sent = 0, last = performance.now();
+    let frameCounter = 0;
+    const POST_EVERY_N_FRAMES = 120;  // ⏱️ Slower update (~4 seconds)
 
-  // ---- 2. Continuous low-latency stream over WebSocket --------------------
-  let sent = 0, last = performance.now();
-  function loop() {
-    if (video.readyState >= 2) {                 // HAVE_CURRENT_DATA
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      socket.volatile.emit('frame', canvas.toDataURL('image/jpeg', 0.7));
-    }
-    sent++;
-    const now = performance.now();
-    if (now - last > 1000) {
-      fpsEl.textContent = `Send FPS: ${sent}`;   // simple FPS meter
-      sent = 0; last = now;
-    }
-    requestAnimationFrame(loop);
-  }
-  // socket.on('sr_frame', url => { imgSR.src = url; });
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+        statusEl.textContent = "Camera started ✔️";
+        requestAnimationFrame(loop);
+      })
+      .catch(err => alert('Camera error: ' + err));
 
-  // ---- 3. Snapshot-on-click via HTTP POST ---------------------------------
-  snapBtn.addEventListener('click', () => {
-    statusEl.textContent = 'Capturing…';
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    canvas.toBlob(async blob => {
-      try {
-        const form = new FormData();
-        form.append('file', blob, 'snapshot.jpg');
-        const r = await fetch('/upload', { method:'POST', body:form });
-        const j = await r.json();
-        if (j.sr && Array.isArray(j.sr)) {
-          const gallery = document.getElementById('srGallery');
-          gallery.innerHTML = ''; // clear old
-          j.sr.forEach(uri => {
-            const img = document.createElement('img');
-            img.src = uri;
-            img.alt = 'SR face';
-            img.width = 160;
-            img.height = 120;
-            img.style.margin = '4px';
-            gallery.appendChild(img);
-          });
-          statusEl.textContent = `Snapshot enhanced ✔️ (${j.sr.length} face${j.sr.length > 1 ? 's' : ''})`;
-        } else {
-          statusEl.textContent = 'Server error';
+    function loop() {
+      if (video.readyState >= 2) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        socket.volatile.emit('frame', canvas.toDataURL('image/jpeg', 0.7));
+
+        if (++frameCounter >= POST_EVERY_N_FRAMES) {
+          frameCounter = 0;
+          canvas.toBlob(async blob => {
+            const form = new FormData();
+            form.append('file', blob, 'frame.jpg');
+            try {
+              const r = await fetch('/upload', { method: 'POST', body: form });
+              const j = await r.json();
+              if (j.sr && Array.isArray(j.sr)) {
+                const gallery = document.getElementById('srGallery');
+                gallery.innerHTML = '';
+                j.sr.forEach(uri => {
+                  const img = document.createElement('img');
+                  img.src = uri;
+                  img.alt = 'Detected SR Face';
+                  img.onclick = () => {
+                    selectedImg.src = uri;
+                    selectedImg.alt = 'Selected Face';
+                  };
+                  gallery.appendChild(img);
+                });
+                statusEl.textContent = `Auto-scan ✔️ ${j.sr.length} face${j.sr.length > 1 ? 's' : ''} enhanced`;
+              } else {
+                statusEl.textContent = 'No face detected';
+              }
+            } catch (e) {
+              console.error(e);
+              statusEl.textContent = '⚠️ Network error';
+            }
+          }, 'image/jpeg', 0.85);
         }
-      } catch (e) {
-        console.error(e);
-        statusEl.textContent = 'Network error';
       }
-    }, 'image/jpeg', 0.85);
-  });
+
+      sent++;
+      const now = performance.now();
+      if (now - last > 1000) {
+        fpsEl.textContent = `📷 FPS: ${sent}`;
+        sent = 0; last = now;
+      }
+
+      requestAnimationFrame(loop);
+    }
   </script>
+
+  <footer>
+    © 2025 Qualcomm AI Hackathon — Powered by QAIHub + Real-Time Vision
+  </footer>
+
 </body>
 </html>
