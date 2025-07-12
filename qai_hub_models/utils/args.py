@@ -352,6 +352,7 @@ def get_model_cli_parser(
         parser = get_parser()
 
     from_pretrained_sig = inspect.signature(cls.from_pretrained)
+    print("from_pretrained_sig: ", from_pretrained_sig)
     for name, param in from_pretrained_sig.parameters.items():
         if name == "cls":
             continue

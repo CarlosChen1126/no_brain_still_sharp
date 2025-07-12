@@ -5,15 +5,18 @@ from qai_hub_models.utils.args import (
     get_on_device_demo_parser,
     validate_on_device_demo_args,
 )
-from qai_hub_models.models.xlsr.model import MODEL_ID, XLSR
+# from qai_hub_models.models.xlsr.model import MODEL_ID, XLSR
+from qai_hub_models.models.esrgan.model import ESRGAN, MODEL_ASSET_VERSION, MODEL_ID
 from qai_hub_models.utils.base_model import BaseModel, TargetRuntime
 from PIL import Image
 
 def upscale_image_from_path_or_url(image: Image.Image):
-    model_cls = XLSR
+    model_cls = ESRGAN
     model_id = MODEL_ID
     available_target_runtimes = list(TargetRuntime.__members__.values())
 
+    print(model_id)
+    print(model_cls.from_pretrained) 
     parser = get_model_cli_parser(model_cls)
     parser = get_on_device_demo_parser(
         parser,

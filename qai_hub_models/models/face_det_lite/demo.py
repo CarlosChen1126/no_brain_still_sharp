@@ -1,0 +1,88 @@
+# ---------------------------------------------------------------------
+# Copyright (c) 2024 Qualcomm Innovation Center, Inc. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
+# ---------------------------------------------------------------------
+import json
+from pathlib import Path
+
+from qai_hub_models.models.face_det_lite.app import FaceDetLiteApp
+from qai_hub_models.models.face_det_lite.model import (
+    MODEL_ASSET_VERSION,
+    MODEL_ID,
+    FaceDetLite,
+)
+from qai_hub_models.utils.args import (
+    demo_model_from_cli_args,
+    get_model_cli_parser,
+    get_on_device_demo_parser,
+    validate_on_device_demo_args,
+)
+from qai_hub_models.utils.asset_loaders import CachedWebModelAsset, load_image
+from qai_hub_models.utils.display import display_or_save_image
+from PIL import Image
+import ast
+INPUT_IMAGE_ADDRESS = CachedWebModelAsset.from_asset_store(
+    MODEL_ID, MODEL_ASSET_VERSION, "test_640x480_Rooney.jpg"
+)
+
+def extract_bounding_boxes(img: Image.Image, boxes: list):
+    crops = []
+    for box in boxes:
+        x, y, w, h, _ = box
+        
+        left = int(x)
+        upper = int(y)
+        right = int(x + w)
+        lower = int(y + h)
+        
+        crop = img.crop((left, upper, right, lower))
+        crops.append(crop)
+    return crops
+# Run face_det_lite model end-to-end on a sample image.
+# The demo will output the face bounding boxes in json files
+# the bounding box represented by left, top, width, and height.
+def main(is_test: bool = False):
+    # Demo parameters
+    parser = get_model_cli_parser(FaceDetLite)
+    parser = get_on_device_demo_parser(parser, add_output_dir=True)
+    parser.add_argument(
+        "--image",
+        type=str,
+        default=INPUT_IMAGE_ADDRESS,
+        help="image file path or URL",
+    )
+    args = parser.parse_args([] if is_test else None)
+    model = demo_model_from_cli_args(FaceDetLite, MODEL_ID, args)
+    validate_on_device_demo_args(args, MODEL_ID)
+
+    # Load image
+    orig_image = load_image(args.image)
+    print("Image size:", orig_image.size)
+    print("Model Loaded")
+
+    app = FaceDetLiteApp(model)
+    res, out = app.run_inference_on_image(orig_image)
+    out_dict = {}
+
+    out_dict["bounding box"] = str(res)
+    
+    if not is_test:
+        # output_path = (
+        #     args.output_dir or str(Path() / "build")
+        # ) + "/FaceDetLitebNet_output.json"
+        output_path = "./FaceDetLitebNet_output.json"
+
+        with open(output_path, "w", encoding="utf-8") as wf:
+            json.dump(out_dict, wf, ensure_ascii=False, indent=4)
+        
+        boxes = ast.literal_eval(out_dict["bounding box"])
+        crops = extract_bounding_boxes(orig_image, boxes)
+        for i, crop in enumerate(crops):
+            crop.save(f"crop_{i}.jpg")
+        display_or_save_image(out, args.output_dir, "FaceDetLitebNet_output.png")
+        print(args.output_dir)
+        print(f"Model outputs are saved at: {output_path}")
+
+
+if __name__ == "__main__":
+    main()
