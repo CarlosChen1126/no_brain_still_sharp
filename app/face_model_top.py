@@ -168,14 +168,15 @@ def face_detection_recover(image: Image.Image):
 def paste_boxes_back_to_image(img: Image.Image, boxes: list, small_img: Image.Image) -> Image.Image:
     img_copy = img.copy()
 
-    for box in boxes:
-        x, y, w, h, _ = box
-        left = int(x)
-        upper = int(y)
-        right = int(x + w)
-        lower = int(y + h)
-        
-        img_copy.paste(small_img, (left, upper))
+    # for box in boxes:
+        # print(box)
+    x, y, w, h = boxes
+    left = int(x)
+    upper = int(y)
+    right = int(x + w)
+    lower = int(y + h)
+    
+    img_copy.paste(small_img, (left, upper))
 
     return img_copy
 def pic_recover(images: List[Image.Image], original_w, original_h, original_pos_lists, o_img):
