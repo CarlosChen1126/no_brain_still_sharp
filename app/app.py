@@ -14,6 +14,7 @@ from face_model_top import face_detection
 from PIL import Image
 
 import io
+camera = cv2.VideoCapture(0)  # or try (1) if external webcam
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "secret!"  # for session cookies
@@ -26,37 +27,31 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload():
-    """
-    Browser sends a FormData with a field called “file”.
-    We read it, super-resolve it, return { sr: data-URI }.
-    """
     file = request.files.get('file')
     if file is None:
         return jsonify(error='No file uploaded'), 400
 
     try:
-        # Read webcam snapshot -> PIL
         img = Image.open(file.stream).convert('RGB')
     except Exception as exc:
         return jsonify(error=f'Bad image: {exc}'), 400
 
-    # Run SR
-    # sr_img = run_sr(img)
-    sr_face_imgs = []
     face_images = face_detection(img)
-    # sr_img = upscale_image_from_path_or_url(img)
+    sr_face_imgs = []
+
     for face_image in face_images:
         sr_face_img = upscale_image_from_path_or_url(face_image)
 
-        # Encode to base64 <img src="data:...">
+        # Encode to base64
         buf = io.BytesIO()
         sr_face_img[0].save(buf, format='JPEG', quality=90)
         b64 = base64.b64encode(buf.getvalue()).decode()
         data_uri = f'data:image/jpeg;base64,{b64}'
+        sr_face_imgs.append(data_uri)  # ✅ collect all data URIs
 
-    return jsonify(sr=data_uri)
+    return jsonify(sr=sr_face_imgs)  # ✅ return the full list
     
 
 if __name__ == "__main__":
     # Use eventlet for production; disable Flask debug for speed.
-    socketio.run(app, host="0.0.0.0", port=5000)
+    socketio.run(app, host="0.0.0.0", port=5001)
