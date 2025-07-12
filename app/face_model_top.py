@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from PIL import Image
 
+from typing import List
+
 from sr_model_top import upscale_image_from_path_or_url  # ✅ Import your SR function
 from qai_hub_models.models.face_det_lite.app import FaceDetLiteApp
 from qai_hub_models.models.face_det_lite.model import (
@@ -82,7 +84,6 @@ def should_save_image():
     return False
 
 def resize_to_multiple_of_32_recover(img):
-
     w, h = img.size
     new_w = (w + 31) // 32 * 32
     new_h = (h + 31) // 32 * 32
@@ -164,3 +165,20 @@ def face_detection_recover(image: Image.Image):
         face_images.append(crop)
         # crop.save(f"crop_{i}.jpg")
     return face_images, original_w, original_h, original_pos_lists
+def paste_boxes_back_to_image(img: Image.Image, boxes: list, small_img: Image.Image) -> Image.Image:
+    img_copy = img.copy()
+
+    for box in boxes:
+        x, y, w, h, _ = box
+        left = int(x)
+        upper = int(y)
+        right = int(x + w)
+        lower = int(y + h)
+        
+        img_copy.paste(small_img, (left, upper))
+
+    return img_copy
+def pic_recover(images: List[Image.Image], original_w, original_h, original_pos_lists, o_img):
+    for i, image in enumerate(images):
+        o_img = paste_boxes_back_to_image(o_img, original_pos_lists[i], image)
+    return o_img

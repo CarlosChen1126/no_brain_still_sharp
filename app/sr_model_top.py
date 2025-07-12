@@ -5,9 +5,6 @@ from qai_hub_models.utils.args import (
     get_on_device_demo_parser,
     validate_on_device_demo_args,
 )
-<<<<<<< HEAD
-from qai_hub_models.utils.base_model import TargetRuntime
-=======
 # from qai_hub_models.models.xlsr.model import MODEL_ID, XLSR
 # from qai_hub_models.models.esrgan.model import ESRGAN, MODEL_ASSET_VERSION, MODEL_ID
 from qai_hub_models.utils.base_model import BaseModel, TargetRuntime
@@ -16,7 +13,6 @@ from qai_hub_models.utils.base_model import BaseModel, TargetRuntime
 #     MODEL_ID,
 #     Real_ESRGAN_x4plus,
 # )
->>>>>>> a6bf22f (update)
 from qai_hub_models.models.real_esrgan_general_x4v3.model import (
     MODEL_ASSET_VERSION,
     MODEL_ID,
