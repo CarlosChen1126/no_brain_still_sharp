@@ -169,7 +169,7 @@ def face_detection_recover(image: Image.Image):
 
     for i, crop in enumerate(crops):
         face_images.append(crop)
-        crop.save(f"crop_{i}.jpg")
+        # crop.save(f"crop_{i}.jpg")
     return face_images, original_w, original_h, original_pos_lists
 def rescale_boxes(boxes, resized_size, original_size):
     resized_w, resized_h = resized_size

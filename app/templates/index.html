@@ -107,6 +107,17 @@
       color: #000;
     }
 
+    #rightPanel,
+    #snapResultPanel.side-panel {
+      flex: 1;
+      padding: 1rem 2rem;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+
     #status, #fps {
       font-size: 0.9rem;
       margin-top: 0.4rem;
@@ -185,9 +196,9 @@
         <button class="icon-btn" id="snapBtn">
           <i class="fas fa-camera-retro"></i> Snap & Enhance
         </button>
-        <a href="/result" class="icon-btn" style="text-decoration: none; margin-left: 10px;">
+        <!-- <a href="/result" class="icon-btn" style="text-decoration: none; margin-left: 10px;">
           <i class="fas fa-image"></i> View Reconstruction
-        </a>
+        </a> -->
       </div>
       <p id="status"></p>
       <div id="fps"></div>
@@ -206,6 +217,15 @@
         <img id="selectedFace" src="" alt="Click a face to preview here">
       </div>
     </div>
+        
+    <div id="snapResultPanel" class="side-panel" style="display: none;">
+      <h3 style="color: #00e0ff;">Captured & Recovered Image</h3>
+      <img id="recoveredImage" src="" alt="Recovered Result" style="width: 100%; max-width: 480px; border: 2px solid #00e0ff; border-radius: 12px; margin: 0 auto;">
+      <button class="icon-btn" style="margin: 1rem auto 0;" id="backToGalleryBtn">
+        <i class="fas fa-arrow-left"></i> Back to Gallery
+      </button>
+    </div>
+
   </div>
 
   <canvas id="off" width="320" height="240"></canvas>
@@ -326,7 +346,10 @@
           const duration = ((performance.now() - start) / 1000).toFixed(2);
 
           if (json.sr) {
-            selectedFace.src = json.sr;  // Update preview if needed
+            const recoveredImage = document.getElementById('recoveredImage');
+            recoveredImage.src = json.sr;  // Update preview if needed
+            document.getElementById('rightPanel').style.display = 'none';
+            document.getElementById('snapResultPanel').style.display = 'block';
             statusEl.textContent = `Recovered in ${duration}s`;
           } else {
             statusEl.textContent = 'Recovery failed';
@@ -337,7 +360,10 @@
         }
       }, 'image/jpeg', 0.8);
     }
-
+    document.getElementById('backToGalleryBtn').addEventListener('click', () => {
+      document.getElementById('snapResultPanel').style.display = 'none';
+      document.getElementById('rightPanel').style.display = 'flex';
+    });
     filterButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         filterButtons.forEach(b => b.classList.remove('active'));
