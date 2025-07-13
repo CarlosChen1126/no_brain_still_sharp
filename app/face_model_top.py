@@ -106,7 +106,7 @@ def face_detection(image: Image.Image):
     res, _ = app.run_inference_on_image(resized_image)
     boxes = ast.literal_eval(str(res))
     crops = extract_bounding_boxes(resized_image, boxes)
-    print("small image size: ", crops[0].size)
+    # print("small image size: ", crops[0].size)
     print(boxes)
 
     enhanced_crops = []

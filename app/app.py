@@ -41,15 +41,18 @@ def upload():
 
     # Run detection
     face_images = face_detection(img)  # Returns list of face images
-    detr_images = detr_run(img)        # Returns list of (Image, label) tuples or just Images
+    detr_images, detr_tags = detr_run(img)        # Returns list of (Image, label) tuples or just Images
+    print("detr_tags: ", detr_tags)
 
-    # Normalize detr_images to be (Image, label)
-    formatted_detr_images = []
-    for item in detr_images:
-        if isinstance(item, tuple):
-            formatted_detr_images.append(item)
-        else:
-            formatted_detr_images.append((item, "unknown"))
+    # # Normalize detr_images to be (Image, label)
+    # formatted_detr_images = []
+    # for item in detr_images:
+    #     if isinstance(item, tuple):
+    #         formatted_detr_images.append(item)
+    #     else:
+    #         formatted_detr_images.append((item, "unknown"))
+    formatted_detr_images = list(zip(detr_images, detr_tags))
+
 
     # Combine all detections
     all_detections = [(im, "people") for im in face_images] + formatted_detr_images

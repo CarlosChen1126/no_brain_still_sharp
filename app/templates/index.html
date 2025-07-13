@@ -197,10 +197,8 @@
       <div id="filterButtons">
         <button class="filter-btn active" data-type="all">All</button>
         <button class="filter-btn" data-type="people">People</button>
-        <button class="filter-btn" data-type="cat">Cat</button>
-        <button class="filter-btn" data-type="dog">Dog</button>
-        <button class="filter-btn" data-type="car">Car</button>
-        <button class="filter-btn" data-type="motorcycle">Motorcycle</button>
+        <button class="filter-btn" data-type="animals">Animals</button>
+        <button class="filter-btn" data-type="vehicles">Vehicles</button>
       </div>
       <div id="srGallery"></div>
       <div id="selectedBox">
@@ -228,6 +226,8 @@
     let frameCounter = 0;
     const POST_EVERY_N_FRAMES = 5;
     let isUploading = false;
+
+    let btn_type = 'all'
 
     navigator.mediaDevices.getUserMedia({ video: true })
       .then(stream => {
@@ -264,6 +264,10 @@
                   img.src = item.src;
                   img.alt = item.type;
                   img.classList.add('gallery-item', item.type);
+                  if(btn_type !== 'all' && item.type !== btn_type) {
+                    img.style.display = 'none';
+                  }
+                  
                   if (shrink) {
                     img.style.width = '120px';
                     img.style.height = '160px';
@@ -339,6 +343,7 @@
         filterButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         const type = btn.dataset.type;
+        btn_type = type;
         const items = document.querySelectorAll('#srGallery .gallery-item');
         items.forEach(item => {
           item.style.display = (type === 'all' || item.classList.contains(type)) ? '' : 'none';

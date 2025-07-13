@@ -21,7 +21,7 @@ from qai_hub_models.models.conditional_detr_resnet50.model import (
     MODEL_ID,
     ConditionalDETRResNet50,
 )
-from sr_model_top import upscale_image_from_path_or_url  # ✅ Import your SR function
+from gsr_model_top import upscale_image_from_path_or_url  # ✅ Import your SR function
 
 # Run DETR app end-to-end on a sample image.
 # The demo will display the predicted mask in a window.
@@ -119,13 +119,25 @@ def detr_run(img: Image.Image):
     crops = extract_bounding_boxes(img, boxes)
     # pred_image = Image.fromarray(pred_images[0])
 
-    enhanced_crops = []
-    for crop in crops:
-        sr = upscale_image_from_path_or_url(crop)
-        if sr:
-            enhanced_crops.append(sr[0])
+    tags_tmp = []
+    for label in labels:
+        if label >= 2 and label <= 9: # vehicles
+            tags_tmp.append("vehicles")
+        elif label >= 16 and label <= 25: # animals
+            tags_tmp.append("animals")
         else:
-            enhanced_crops.append(crop)
+            tags_tmp.append("none")
+
+    enhanced_crops = []
+    tags = []
+    for i, crop in enumerate(crops):
+        if tags_tmp[i] != "none":
+            tags.append(tags_tmp[i])
+            sr = upscale_image_from_path_or_url(crop)
+            if sr:
+                enhanced_crops.append(sr[0])
+            else:
+                enhanced_crops.append(crop)
 
     # is_test = False
 
@@ -143,4 +155,4 @@ def detr_run(img: Image.Image):
     print("boxes: ", boxes)
     print("------done------")
 
-    return enhanced_crops
+    return enhanced_crops, tags
