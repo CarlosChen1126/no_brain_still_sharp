@@ -25,24 +25,6 @@ import threading
 _model_instance = None
 _model_lock = threading.Lock()
 
-def _load_model_once():
-    global _model_instance
-    if _model_instance is None:
-        with _model_lock:
-            if _model_instance is None:
-                print("📦 Loading ESRGAN model...")
-                model_cls = Real_ESRGAN_General_x4v3
-                parser = get_model_cli_parser(model_cls)
-                parser = get_on_device_demo_parser(
-                    parser,
-                    add_output_dir=True,
-                    available_target_runtimes=list(TargetRuntime.__members__.values()),
-                )
-                parser.add_argument("--image", type=str, default=str)
-                args = parser.parse_args([])
-                _model_instance = demo_model_from_cli_args(model_cls, MODEL_ID, args)
-    return _model_instance
-
 def load_sr_model():
     model_cls = Real_ESRGAN_General_x4v3
     parser = get_model_cli_parser(model_cls)
