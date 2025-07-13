@@ -1,2 +1,4 @@
 **/__pycache__
 app/Data/
+app/static/
+**/.DS_Store

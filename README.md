@@ -1,16 +1,16 @@
 [![Qualcomm® AI Hub Models](https://qaihub-public-assets.s3.us-west-2.amazonaws.com/qai-hub-models/quic-logo.jpg)](https://aihub.qualcomm.com)
 
-# [Qualcomm® AI Hub Models](https://aihub.qualcomm.com/)
+<!-- # [Qualcomm® AI Hub Models](https://aihub.qualcomm.com/) -->
 
 [![Release](https://img.shields.io/github/v/release/quic/ai-hub-models)](https://github.com/quic/ai-hub-models/releases/latest)
 [![Tag](https://img.shields.io/github/v/tag/quic/ai-hub-models)](https://github.com/quic/ai-hub-models/releases/latest)
 [![PyPi](https://img.shields.io/pypi/v/qai-hub-models)](https://pypi.org/project/qai-hub-models/)
 ![Python 3.9, 3.10, 3.11, 3.12](https://img.shields.io/badge/python-3.9%2C%203.10%20(Recommended)%2C%203.11%2C%203.12-yellow)
 
-The Qualcomm® AI Hub Models are a collection of
-state-of-the-art machine learning models optimized for deployment on Qualcomm® devices.
+<!-- The Qualcomm® AI Hub Models are a collection of
+state-of-the-art machine learning models optimized for deployment on Qualcomm® devices.  -->
 
-* [List of Models by Category](#model-directory)
+<!-- * [List of Models by Category](#model-directory)
 * [On-Device Performance Data](https://aihub.qualcomm.com/models)
 * [Device-Native Sample Apps](https://github.com/quic/ai-hub-apps)
 
@@ -18,6 +18,43 @@ See supported: [On-Device Runtimes](#on-device-runtimes), [Hardware Targets & Pr
 
 &nbsp;
 
+![Demo](https://user-images.githubusercontent.com/demo/face_enhancement.gif)  
+A real-time, browser-based face enhancement app using lightweight detection and super-resolution models. Designed for fast inference and educational demonstration, it showcases low-latency AI inference powered by edge devices. -->
+
+# 🧠 No Brain, Still Sharp — Real-Time Face Enhancement
+
+## ✨ Overview
+
+**"No Brain, Still Sharp"** is a real-time face detection and enhancement demo. It captures webcam frames in the browser, detects faces and objects, applies face super-resolution (SR), and displays cropped enhanced faces live on a responsive frontend. Users can also recover an enhanced full image view by clicking the **"Snap & Enhance"** button.
+
+This app was developed as a Qualcomm AI Edge demo to highlight:
+
+- Lightweight face and object detection (via DETR and custom models)
+- Face super-resolution enhancement (ESRGAN-style)
+- Seamless real-time experience using Flask and SocketIO
+
+---
+
+## 👨‍💻 Developers
+
+| Name           | Contact                        |
+|----------------|--------------------------------|
+| Morris Fan     | https://github.com/thisismorris|
+| ChiRay Tseng   | https://github.com/c1tseng      |
+| IChen Chuang   | https://github.com/zhuangggg   |
+| Yu-Chen Chen   | https://github.com/carloschen1126|
+| Kate Peterson  |      |
+
+---
+x
+## 🛠️ Setup Instructions
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/your-org/no-brain-still-sharp.git
+cd no-brain-still-sharp
+```
 ## Setup
 
 ### 1. Install Python Package
@@ -97,7 +134,7 @@ _End-to-end_ demos:
 **Native** applications that can run our models (with pre- and post-processing) on physical devices are published in the [AI Hub Apps repository](https://github.com/quic/ai-hub-apps/).
 
 **Python** applications are defined for all models [(from qai_hub_models.models.\<model_name> import App)](https://github.com/quic/ai-hub-models/blob/main/qai_hub_models/models/yolov7/app.py). These apps wrap model inference with pre- and post-processing steps written using torch & numpy. **These apps are optimized to be an easy-to-follow example, rather than to minimize prediction time.**
-
+<!-- 
 &nbsp;
 
 ## Model Support Data
@@ -338,4 +375,4 @@ Email: ai-hub-support@qti.qualcomm.com.
 
 ## LICENSE
 
-Qualcomm® AI Hub Models is licensed under BSD-3. See the [LICENSE file](LICENSE).
+Qualcomm® AI Hub Models is licensed under BSD-3. See the [LICENSE file](LICENSE). -->
