@@ -14,16 +14,6 @@ from PIL import Image
 from sr_model_top import upscale_image_from_path_or_url, load_sr_model
 from face_model_top import face_detection, face_detection_recover, pic_recover, load_face_model
 from detr_model_top import detr_run, load_detr_model
-# from app.model_cls = Real_ESRGAN_General_x4v3
-                parser = get_model_cli_parser(model_cls)
-                parser = get_on_device_demo_parser(
-                    parser,
-                    add_output_dir=True,
-                    available_target_runtimes=list(TargetRuntime.__members__.values()),
-                )
-                parser.add_argument("--image", type=str, default=str)
-                args = parser.parse_args([])
-                _model_instance = demo_model_from_cli_args(model_cls, MODEL_ID, args)yolo_model_top import yolo_detection
 
 # Initialize Flask and SocketIO
 app = Flask(__name__)
