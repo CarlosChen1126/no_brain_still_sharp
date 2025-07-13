@@ -129,7 +129,7 @@
       gap: 14px;
       overflow-y: auto;
       padding: 0.5rem 0;
-      max-height: 600px; /* Increased height */
+      max-height: 720px;
     }
 
     #srGallery img {
@@ -296,17 +296,9 @@
       requestAnimationFrame(loop);
     }
 
-    snapBtn.addEventListener('click', () => {
-      frameCounter = POST_EVERY_N_FRAMES;
-    });
+    snapBtn.addEventListener('click', captureAndRecover);
 
-    filterButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        filterButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-<<<<<<< HEAD
-  async function captureAndRecover() {
+    async function captureAndRecover() {
       if (video.readyState < 2) {
         statusEl.textContent = 'Camera not ready';
         return;
@@ -330,7 +322,7 @@
           const duration = ((performance.now() - start) / 1000).toFixed(2);
 
           if (json.sr) {
-            resultImg.src = json.sr; // TODO: change to another block
+            selectedFace.src = json.sr;  // Update preview if needed
             statusEl.textContent = `Recovered in ${duration}s`;
           } else {
             statusEl.textContent = 'Recovery failed';
@@ -341,9 +333,11 @@
         }
       }, 'image/jpeg', 0.8);
     }
-  snapBtn.addEventListener('click', () => captureAndRecover());
-</script>
-=======
+
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
         const type = btn.dataset.type;
         const items = document.querySelectorAll('#srGallery .gallery-item');
         items.forEach(item => {
@@ -352,6 +346,5 @@
       });
     });
   </script>
->>>>>>> dac61f3 (add website photo filter)
 </body>
 </html>
