@@ -6,7 +6,7 @@ from PIL import Image
 
 from typing import List
 
-from sr_model_top import upscale_image_from_path_or_url  # ✅ Import your SR function
+# from sr_model_top import upscale_image_from_path_or_url  # ✅ Import your SR function
 from qai_hub_models.models.face_det_lite.app import FaceDetLiteApp
 from qai_hub_models.models.face_det_lite.model import (
     MODEL_ASSET_VERSION,
@@ -145,19 +145,19 @@ def face_detection(model, image: Image.Image):
     # return face_images
 
 
-def face_detection_recover(image: Image.Image):
-    parser = get_model_cli_parser(FaceDetLite)
-    parser = get_on_device_demo_parser(parser, add_output_dir=True)
-    parser.add_argument(
-        "--image",
-        type=str,
-        default=str,
-        help="image file path or URL",
-    )
-    is_test = False
-    args = parser.parse_args([] if is_test else None)
-    model = demo_model_from_cli_args(FaceDetLite, MODEL_ID, args)
-    validate_on_device_demo_args(args, MODEL_ID)
+def face_detection_recover(model, image: Image.Image):
+    # parser = get_model_cli_parser(FaceDetLite)
+    # parser = get_on_device_demo_parser(parser, add_output_dir=True)
+    # parser.add_argument(
+    #     "--image",
+    #     type=str,
+    #     default=str,
+    #     help="image file path or URL",
+    # )
+    # is_test = False
+    # args = parser.parse_args([] if is_test else None)
+    # model = demo_model_from_cli_args(FaceDetLite, MODEL_ID, args)
+    # validate_on_device_demo_args(args, MODEL_ID)
     resized_image, original_w, original_h = resize_to_multiple_of_32_recover(image)
     print("Model Loaded")
 

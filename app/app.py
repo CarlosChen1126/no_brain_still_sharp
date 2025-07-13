@@ -91,11 +91,11 @@ def recover():
     except Exception as exc:
         return jsonify(error=f'Bad image: {exc}'), 400
 
-    face_images_r, o_w, o_h, o_pos_lists = face_detection_recover(img)
+    face_images_r, o_w, o_h, o_pos_lists = face_detection_recover(face_model, img)
     print("o pos lists: ", o_pos_lists)
     sr_results = []
     for face_image in face_images_r:
-        sr_face_img = upscale_image_from_path_or_url(face_image)
+        sr_face_img = upscale_image_from_path_or_url(sr_model, face_image)
         sr_results.append(sr_face_img[0])
 
     rec_pic = pic_recover(sr_results, o_w, o_h, o_pos_lists, img)
