@@ -100,10 +100,10 @@ def detr_run(img: Image.Image):
 
     # Load image & model
     detr = demo_model_from_cli_args(ConditionalDETRResNet50, MODEL_ID, args)
-    if isinstance(detr, ConditionalDETRResNet50):
-        input_spec = detr.get_input_spec()
-    else:
-        input_spec = ConditionalDETRResNet50.get_input_spec()
+    # if isinstance(detr, ConditionalDETRResNet50):
+    #     input_spec = detr.get_input_spec()
+    # else:
+    #     input_spec = ConditionalDETRResNet50.get_input_spec()
     # (h, w) = input_spec["image"][0][2:]
     # w, h = image.size
 
