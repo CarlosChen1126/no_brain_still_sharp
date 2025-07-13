@@ -21,7 +21,7 @@ from qai_hub_models.models.conditional_detr_resnet50.model import (
     MODEL_ID,
     ConditionalDETRResNet50,
 )
-from gsr_model_top import upscale_image_from_path_or_url  # ✅ Import your SR function
+from sr_model_top import upscale_image_from_path_or_url  # ✅ Import your SR function
 
 # Run DETR app end-to-end on a sample image.
 # The demo will display the predicted mask in a window.
