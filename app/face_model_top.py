@@ -111,12 +111,12 @@ def face_detection(image: Image.Image):
 
     enhanced_crops = []
     for crop in crops:
-        sr = upscale_image_from_path_or_url(crop)
+        # sr = upscale_image_from_path_or_url(crop)
         # print("small optimized image size: ", sr[0].size)
-        if sr:
-            enhanced_crops.append(sr[0])
-        else:
-            enhanced_crops.append(crop)
+        # if sr:
+        #     enhanced_crops.append(sr[0])
+        # else:
+        enhanced_crops.append(crop)
 
     # Save logic every 6 seconds only
     if should_save_image():

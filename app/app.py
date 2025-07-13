@@ -94,6 +94,7 @@ def recover():
         sr_results.append(sr_face_img[0])
 
     rec_pic = pic_recover(sr_results, o_w, o_h, o_pos_lists, img)
+    print("rec pic: ", rec_pic.size)
     buf = io.BytesIO()
     rec_pic.save(buf, format='JPEG', quality=90)
     b64 = base64.b64encode(buf.getvalue()).decode()
