@@ -90,13 +90,16 @@ def resize_to_multiple_of_32_recover(img):
     resized_img = img.resize((new_w, new_h))
     return resized_img, w, h
 
-def face_detection(image: Image.Image):
+def load_face_model():
     parser = get_model_cli_parser(FaceDetLite)
     parser = get_on_device_demo_parser(parser, add_output_dir=True)
     parser.add_argument("--image", type=str, default=str)
     args = parser.parse_args([])
     model = demo_model_from_cli_args(FaceDetLite, MODEL_ID, args)
-    validate_on_device_demo_args(args, MODEL_ID)
+    return model
+
+def face_detection(model, image: Image.Image):
+    # validate_on_device_demo_args(args, MODEL_ID)
     print("old image size: ", image.size)
     resized_image = resize_to_multiple_of_32(image)
     print("resized image size: ", resized_image.size)

@@ -21,7 +21,6 @@ from qai_hub_models.models.conditional_detr_resnet50.model import (
     MODEL_ID,
     ConditionalDETRResNet50,
 )
-from sr_model_top import upscale_image_from_path_or_url  # ✅ Import your SR function
 
 # Run DETR app end-to-end on a sample image.
 # The demo will display the predicted mask in a window.
@@ -82,12 +81,18 @@ def resize_to_multiple_of_32(img):
     w, h = img.size
     return img.resize(((w + 31) // 32 * 32, (h + 31) // 32 * 32))
 
-
-def detr_run(img: Image.Image):
-    # Demo parameters
-    # parser = get_model_cli_parser(model_cls)
+def load_detr_model():
     parser = get_model_cli_parser(ConditionalDETRResNet50)
     parser = get_on_device_demo_parser(parser, add_output_dir=True)
+    args = parser.parse_args([])
+    detr = demo_model_from_cli_args(ConditionalDETRResNet50, MODEL_ID, args)
+    return detr
+
+def detr_run(detr, img: Image.Image):
+    # Demo parameters
+    # parser = get_model_cli_parser(model_cls)
+    # parser = get_model_cli_parser(ConditionalDETRResNet50)
+    # parser = get_on_device_demo_parser(parser, add_output_dir=True)
     # parser.add_argument(
     #     "--image",
     #     type=str,
@@ -95,11 +100,11 @@ def detr_run(img: Image.Image):
     #     help="test image file path or URL",
     # )
     # args = parser.parse_args([] if is_test else None)
-    args = parser.parse_args([])
-    validate_on_device_demo_args(args, MODEL_ID)
+    # args = parser.parse_args([])
+    # validate_on_device_demo_args(args, MODEL_ID)
 
     # Load image & model
-    detr = demo_model_from_cli_args(ConditionalDETRResNet50, MODEL_ID, args)
+    # detr = demo_model_from_cli_args(ConditionalDETRResNet50, MODEL_ID, args)
     # if isinstance(detr, ConditionalDETRResNet50):
     #     input_spec = detr.get_input_spec()
     # else:
@@ -113,7 +118,7 @@ def detr_run(img: Image.Image):
     # resized_image = resize_to_multiple_of_32(img)
     # resized_size = resized_image.size
     app = DETRApp(detr, h, w)
-    pred_images, scores, labels, boxes = app.predict(img, DEFAULT_WEIGHTS, threshold = 0.7)
+    pred_images, scores, labels, boxes = app.predict(img, DEFAULT_WEIGHTS, threshold = 0.6)
     boxes[:, 0::2] = boxes[:, 0::2].clamp(0, w)  # x1, x2
     boxes[:, 1::2] = boxes[:, 1::2].clamp(0, h)  # y1, y2
     crops = extract_bounding_boxes(img, boxes)
@@ -133,11 +138,11 @@ def detr_run(img: Image.Image):
     for i, crop in enumerate(crops):
         if tags_tmp[i] != "none":
             tags.append(tags_tmp[i])
-            sr = upscale_image_from_path_or_url(crop)
-            if sr:
-                enhanced_crops.append(sr[0])
-            else:
-                enhanced_crops.append(crop)
+            # sr = upscale_image_from_path_or_url(crop)
+            # if sr:
+            #     enhanced_crops.append(sr[0])
+            # else:
+            enhanced_crops.append(crop)
 
     # is_test = False
 

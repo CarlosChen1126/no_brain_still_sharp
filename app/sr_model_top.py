@@ -43,40 +43,53 @@ def _load_model_once():
                 _model_instance = demo_model_from_cli_args(model_cls, MODEL_ID, args)
     return _model_instance
 
-def upscale_image_from_path_or_url(image: Image.Image):
-    """
-    Takes a PIL.Image and returns the upscaled version using Qualcomm ESRGAN General x4v3 model.
-    """
-    model = _load_model_once()
-    app = SuperResolutionApp(model)
+def load_sr_model():
     model_cls = Real_ESRGAN_General_x4v3
-    model_id = MODEL_ID
-    available_target_runtimes = list(TargetRuntime.__members__.values())
-
     parser = get_model_cli_parser(model_cls)
     parser = get_on_device_demo_parser(
         parser,
         add_output_dir=True,
-        available_target_runtimes=available_target_runtimes,
+        available_target_runtimes=list(TargetRuntime.__members__.values()),
     )
+    parser.add_argument("--image", type=str, default=str)
+    args = parser.parse_args([])
+    model = demo_model_from_cli_args(model_cls, MODEL_ID, args)
+    return model
 
-    parser.add_argument(
-        "--image",
-        type=str,
-        default=str,
-        help="image file path or URL.",
-    )
+def upscale_image_from_path_or_url(model, image: Image.Image):
+    """
+    Takes a PIL.Image and returns the upscaled version using Qualcomm ESRGAN General x4v3 model.
+    """
+    # model = _load_model_once()
+    # app = SuperResolutionApp(model)
+    # model_cls = Real_ESRGAN_General_x4v3
+    # model_id = MODEL_ID
+    # available_target_runtimes = list(TargetRuntime.__members__.values())
 
-    # Simulate CLI args
-    is_test = True
-    args = parser.parse_args([] if is_test else None)
+    # parser = get_model_cli_parser(model_cls)
+    # parser = get_on_device_demo_parser(
+    #     parser,
+    #     add_output_dir=True,
+    #     available_target_runtimes=available_target_runtimes,
+    # )
 
-    inference_model = demo_model_from_cli_args(
-        model_cls,
-        model_id,
-        args,
-    )
+    # parser.add_argument(
+    #     "--image",
+    #     type=str,
+    #     default=str,
+    #     help="image file path or URL.",
+    # )
 
-    app = SuperResolutionApp(inference_model)
+    # # Simulate CLI args
+    # is_test = True
+    # args = parser.parse_args([] if is_test else None)
+
+    # inference_model = demo_model_from_cli_args(
+    #     model_cls,
+    #     model_id,
+    #     args,
+    # )
+
+    app = SuperResolutionApp(model)
     pred_images = app.upscale_image(image)
     return pred_images

@@ -11,9 +11,19 @@ from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO
 from PIL import Image
 
-from sr_model_top import upscale_image_from_path_or_url
-from face_model_top import face_detection, face_detection_recover, pic_recover
-from detr_model_top import detr_run
+from sr_model_top import upscale_image_from_path_or_url, load_sr_model
+from face_model_top import face_detection, face_detection_recover, pic_recover, load_face_model
+from detr_model_top import detr_run, load_detr_model
+# from app.model_cls = Real_ESRGAN_General_x4v3
+                parser = get_model_cli_parser(model_cls)
+                parser = get_on_device_demo_parser(
+                    parser,
+                    add_output_dir=True,
+                    available_target_runtimes=list(TargetRuntime.__members__.values()),
+                )
+                parser.add_argument("--image", type=str, default=str)
+                args = parser.parse_args([])
+                _model_instance = demo_model_from_cli_args(model_cls, MODEL_ID, args)yolo_model_top import yolo_detection
 
 # Initialize Flask and SocketIO
 app = Flask(__name__)
@@ -22,6 +32,11 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Initialize camera if needed
 camera = cv2.VideoCapture(0)
+
+# load models
+detr_model = load_detr_model()
+face_model = load_face_model()
+sr_model   = load_sr_model()
 
 @app.route("/")
 def index():
@@ -40,8 +55,8 @@ def upload():
         return jsonify(error=f'Bad image: {exc}'), 400
 
     # Run detection
-    face_images = face_detection(img)  # Returns list of face images
-    detr_images, detr_tags = detr_run(img)        # Returns list of (Image, label) tuples or just Images
+    face_images = face_detection(face_model, img)  # Returns list of face images
+    detr_images, detr_tags = detr_run(detr_model, img)        # Returns list of (Image, label) tuples or just Images
     print("detr_tags: ", detr_tags)
 
     # # Normalize detr_images to be (Image, label)
@@ -59,7 +74,7 @@ def upload():
 
     sr_results = []
     for cropped_img, label in all_detections:
-        sr_face_img = upscale_image_from_path_or_url(cropped_img)
+        sr_face_img = upscale_image_from_path_or_url(sr_model, cropped_img)
         if not sr_face_img:
             continue
 
