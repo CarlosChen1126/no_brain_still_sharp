@@ -35,18 +35,6 @@ This app was developed as a Qualcomm AI Edge demo to highlight:
 
 ---
 
-## Developers
-
-| Name           | Contact                        |
-|----------------|--------------------------------|
-| Morris Fan     | https://github.com/thisismorris|
-| ChiRay Tseng   | https://github.com/c1tseng      |
-| IChen Chuang   | https://github.com/zhuangggg   |
-| Yu-Chen Chen   | https://github.com/carloschen1126|
-| Kate Peterson  | katepaigepeterson@gmail.com     |
-
----
-
 
 ## Setup Instructionss
 
@@ -93,3 +81,14 @@ Open your browser and go to:
  Try to follow the interactions as demonstrated in the [demo slides](https://www.canva.com/design/DAGs_lJj3Jw/2Mro4jSXDx6zlzmDv9vYAg/edit?ui=eyJBIjp7fX0).
 
 ---
+
+## Developers
+
+| Name           | Contact                        |
+|----------------|--------------------------------|
+| Morris Fan     | https://github.com/thisismorris|
+| ChiRay Tseng   | https://github.com/c1tseng      |
+| IChen Chuang   | https://github.com/zhuangggg   |
+| Yu-Chen Chen   | https://github.com/carloschen1126|
+| Kate Peterson  | katepaigepeterson@gmail.com     |
+
