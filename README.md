@@ -43,7 +43,7 @@ This app was developed as a Qualcomm AI Edge demo to highlight:
 | ChiRay Tseng   | https://github.com/c1tseng      |
 | IChen Chuang   | https://github.com/zhuangggg   |
 | Yu-Chen Chen   | https://github.com/carloschen1126|
-| Kate Peterson  |      |
+| Kate Peterson  | katepaigepeterson@gmail.com     |
 
 ---
 x
