@@ -45,17 +45,20 @@ This app was developed as a Qualcomm AI Edge demo to highlight:
 | Yu-Chen Chen   | https://github.com/carloschen1126|
 | Kate Peterson  | katepaigepeterson@gmail.com     |
 
-## Setup Instructions
+---
 
-### Clone the repository
+
+## Setup Instructionss
+
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/CarlosChen1126/no_brain_still_sharp.git
 cd no_brain_still_sharp
 ```
-## Setup
+### 2. Setup
 
-### Install Python Package
+#### Install Python Package
 
 The package is available via pip:
 
@@ -63,3 +66,30 @@ The package is available via pip:
 pip install qai_hub_models
 ```
 
+---
+
+##  Run & Usage
+
+### 1. Start the backend server
+
+```bash
+cd app
+python app.py
+```
+
+### 2. Open the frontend
+
+Open your browser and go to:  
+ `http://127.0.0.1:5000`
+
+### 3. Use the app
+
+- The app automatically starts webcam capture.
+- Detected faces and objects will appear live on the right panel.
+- Click **"Snap & Enhance"** to generate a full enhanced image using the best resolution.
+- Use the filter buttons (e.g. People, Animals, Vehicles) to sort detected objects.
+- Click any thumbnail to preview it larger.
+
+ Try to follow the interactions as demonstrated in the [demo slides](https://www.canva.com/design/DAGs_lJj3Jw/2Mro4jSXDx6zlzmDv9vYAg/edit?ui=eyJBIjp7fX0).
+
+---
