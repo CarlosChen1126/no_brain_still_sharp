@@ -81,6 +81,10 @@ Open your browser and go to:
  Try to follow the interactions as demonstrated in the [demo slides](https://www.canva.com/design/DAGs_lJj3Jw/2Mro4jSXDx6zlzmDv9vYAg/edit?ui=eyJBIjp7fX0).
 
 ---
+## Reference
+[Qualcomm® AI Hub Models](https://github.com/quic/ai-hub-models)
+
+---
 
 ## Developers
 
